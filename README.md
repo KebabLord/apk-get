@@ -33,5 +33,10 @@ chmod +x apk_dl.sh
 Because apkmirror has cloudflare protection making it impossible to scrape the download url, without using a webdriver (bloat).
 Uptodown on the other hand, is curl friendly.
 
+
 ## Is Uptodown secure?
-Yes, in fact even more legit than apkmirror. It's actually a legit [company](https://www.linkedin.com/company/uptodown/) located in Spain. Also I compared the md5 hashes of some random app apks with the ones on apkmirror, they're the same.
+
+Yes, in fact even more legit than APKMirror. It's a legitimate company located in Spain.<sup>[1](https://www.linkedin.com/company/uptodown/) [2](https://en.uptodown.com/about-us/our-company)</sup>
+I also compared the MD5 hashes of some random app APKs with the ones on APKMirror, and they are identical.
+
+
