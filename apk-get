@@ -113,16 +113,18 @@ grep 'class="button variants"' <<< "$src" && {
 #DEBUG: echo VARIANT: $variant_url;echo FILE_URL: $file_url;echo HASH: $hash;echo VERSION: $version;exit 0
 
 # Download the file.
-echo " - Downloading the $XAPK"
-wget -O "$app.$xapk" -q --show-progress "$file_url"
+echo " - Downloading the ${X}APK"
+wget -O "$app.${x}apk" -q --show-progress "$file_url"
+
+[[ -n "$x" ]] && exit 0 # Exit early as we can't install XAPK files for now.
 
 # Install the apk.
-if ($is_yes || (read -p "Do you want to install the $xapk? (y/n): " yn && [[ $yn == y ]])); then
+if ($is_yes || (read -p "Do you want to install the apk? (y/n): " yn && [[ $yn == y ]])); then
     if which su &>/dev/null;then
         su -c pm install "$app.apk" 2>/dev/null && exit 0
     fi
     if which termux-open &>/dev/null;then
         termux-open "$app.apk" && exit 0
     fi
-    echo "Couldn't install the $XAPK. Make sure that you have \"termux-tools\" installed or you have root."; exit 1
+    echo "Couldn't install the APK. Read the README of this script for more information regarding installing apks."; exit 1
 fi
