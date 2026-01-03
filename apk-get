@@ -1,6 +1,6 @@
 #!/bin/bash
 # Cli tool to download & Install apks from UpToDown, by KebabLord.
-# NOTE: Don't forget to uncomment one of the last lines to enable installing the APK.
+# VERSION: 2.0
 # DEPENDS: wget, curl, awk, grep
 
 # Set default values

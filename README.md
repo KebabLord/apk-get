@@ -1,6 +1,6 @@
 ## Preview:
 ```
-λ ./apkdl.sh telegram
+λ ./apk-get telegram
 1) Telegram X
 2) Telegram
 3) Telegram (Google Play version)
@@ -23,10 +23,10 @@ if on termux, make sure to give it "install unknown apps" permission if you don'
 # Install dependencies
 pkg install wget curl
 # Download the script
-wget -O apk_dl.sh https://github.com/KebabLord/apk_dl.sh/raw/main/apk_dl.sh
+wget -O apk-get https://github.com/KebabLord/apk-get/raw/main/apk-get
 # Give it execute permission
-chmod +x apk_dl.sh
-# Now you can run it with ./apk_dl.sh "application name"
+chmod +x apk-get
+# Now you can run it with ./apk-get "application name"
 ```
 
 ## Why not ApkMirror?
@@ -37,6 +37,6 @@ Uptodown on the other hand, is curl friendly.
 ## Is Uptodown secure?
 
 Yes, in fact even more legit than APKMirror. It's a legitimate company located in Spain.<sup>[1](https://www.linkedin.com/company/uptodown/) [2](https://en.uptodown.com/about-us/our-company)</sup>
-I also compared the MD5 hashes of some random app APKs with the ones on APKMirror, and they are identical.
+I also compared the MD5 hashes of some random app APKs with the ones on APKMirror, and they are identical. Yet, I don't accept any responsibility, use at your own risk.
 
 
