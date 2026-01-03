@@ -42,7 +42,7 @@ send_req() {
 }
 
 # Try different mirrors until one bypasses 500,503 and 504.
-mirrors="tr en de es fr it pt zh ar id ko"
+mirrors="fr en de tr es it pt zh ar id ko"
 for mirror in $mirrors; do
     req=$(send_req $mirror $app) || continue
     grep "Error 503 first byte timeout\|Uptodown 500\|504 Gateway Time" &>/dev/null <<< "$req" && continue
@@ -80,24 +80,27 @@ else
 fi
 
 app_url=${urls[$index]}
+#app_url=$(sed "s/\.$mirror\./\./g" <<< $app_url ) #Remove .en.
 app_title=${titles[$index]}
+slug=$(grep -Po '(?<=https://)[^.]+' <<< $app_url) # Extract app-uri
 echo -e "Selected: $app_title"
+echo DEBUG: $app_url/dw
 
-# Scrape file id by visiting the "downloads" page.
-echo -en " - Scraping the file id..    "
-src=$(curl "$app_url/download" 2>/dev/null | grep -Po 'data-file-id="\d+"')
-[[ $? -gt 0 ]] && echo -e "\r - Couldn't parse the file id." && exit 1
-file_id=$(awk -F '="' '{print $2}' <<< "$src" | tr -d \")
-echo "OK"
+# Scrape file path by visiting the "downloads" page.
+echo -e -n " - Loading download page..    "
+src=$(curl -L --compressed "$app_url/dw" 2>/dev/null)
+grep '404 Not Found' <<< "$src" >/dev/null && echo -e "\n\nERROR: Couldn't load download page, we might be blocked." && exit 1
+echo OK
 
-# Scrape file path by visiting "downloading" page
-echo -en " - Scraping the file path..  "
-filepath="$(curl "$app_url/post-download/$file_id" 2>/dev/null | grep -Po 'post-download" data-url="[^"> ]+' | awk -F 'data-url="' '{print $2}')"
-echo "OK"
+version=$(grep -Po '<div class="version">\K[^<]+' <<< "$src"  | sed 's/\./-/g')
+hash=$(grep -Po 'data-url="\K[^"]+(?="\s+data-download)' <<< "$src" )
+[[ -z "$version" || -z "$hash" ]] && echo -e "\n\nERROR: Couldn't parse file url." && exit 1
+
+file_url="https://dw.uptodown.net/dwn/$hash$slug-$version.apk"
 
 # Download the file.
 echo " - Downloading the APK"
-wget -O "$app.apk" -q --show-progress "https://dw.uptodown.com/dwn/$filepath"
+wget -O "$app.apk" -q --show-progress "$file_url"
 
 # Install the apk.
 if ($is_yes || (read -p "Do you want to install the apk? (y/n): " yn && [[ $yn == y ]])); then
