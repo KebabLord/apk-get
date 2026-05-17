@@ -36,29 +36,39 @@ app="$1"
 # Function to send initial request.
 send_req() {
     # First param being the mirror subdomain, 2nd param is the application name to be searched.
-    curl -m 9 "https://$1.uptodown.com/android/search" -X POST -H \
+    curl -m 9 "https://en.uptodown.com/android/en/s" -X POST -H \
         'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0' -H \
-        'Referer: https://en.uptodown.com/' --data-raw "singlebutton=&q=$2" 2>/dev/null
+        'Referer: https://en.uptodown.com/' -F "queryString=$2" 2>/dev/null
 }
 
 # Try different mirrors until one bypasses 500,503 and 504.
-mirrors="fr en de tr es it pt zh ar id ko"
+mirrors="en"
 for mirror in $mirrors; do
     req=$(send_req $mirror $app) || continue
     grep "Error 503 first byte timeout\|Uptodown 500\|504 Gateway Time" &>/dev/null <<< "$req" && continue
     break
 done
 
-# Parse the results into url+title, exit if grep fails.
-results=$(echo "$req" | grep -Po 'https:\/\/[a-z_-]+?\.[a-z][a-z].uptodown.com\/android" title="[^<>"]+')
-[[ $? != 0 ]] && echo "ERROR: Couldn't find the application." && exit 1
+# Parse the results into url+title, exit if parser fails.
+results=$(python3 -c 'import json,re,sys
+try:
+    j=json.load(sys.stdin)
+    for a in j.get("data",{}).get("apps",[]):
+        name=re.sub(r"<[^>]*>","",a.get("name",""))
+        url=a.get("url","")
+        if name and url:
+            print(url+"\t"+name)
+except Exception:
+    sys.exit(1)
+' <<< "$req")
+[[ $? != 0 || -z "$results" ]] && echo "ERROR: Couldn't find the application." && exit 1
 amount=$(echo "$results" | wc -l)
 
 # Print titles so user can choose one, also add each item to the lists.
 i=1
-while IFS= read -r res; do
-    urls[$i]="$(awk -F '" title="[^ ]+ ' '{print $1}' <<< "$res")"
-    titles[$i]="$(awk -F '" title="[^ ]+ ' '{print $2}' <<< "$res")"
+while IFS=$'\t' read -r url title; do
+    urls[$i]="$url"
+    titles[$i]="$title"
     [ $amount -gt 1 ] && (! $is_first) && [ -z $custom_index ] && echo "$i) ${titles[$i]}"
     [[ "$i" == "$res_limit" ]] && break
     ((i++))
